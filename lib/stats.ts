@@ -31,15 +31,21 @@ export function calculateStats(icebaths: Icebath[]): IcebathStats {
   let longestStreak = 0;
   let tempStreak = 0;
   let lastDate: Date | null = null;
+  let mostRecentDate: Date | null = null;
 
+  // Iterate from most recent to oldest
   for (const ib of sortedByDate.reverse()) {
     const currentDate = new Date(ib.date);
     currentDate.setHours(0, 0, 0, 0);
 
+    // Track the most recent date
+    if (mostRecentDate === null) {
+      mostRecentDate = currentDate;
+    }
+
     if (lastDate === null) {
       lastDate = currentDate;
       tempStreak = 1;
-      currentStreak = 1;
       longestStreak = 1;
       continue;
     }
@@ -47,14 +53,13 @@ export function calculateStats(icebaths: Icebath[]): IcebathStats {
     const daysDiff = differenceInDays(lastDate, currentDate);
 
     if (daysDiff === 1) {
+      // Consecutive day, continue streak
       tempStreak++;
-      if (tempStreak === 1) {
-        currentStreak = tempStreak;
-      }
     } else if (daysDiff === 0) {
-      // Same day, continue streak
+      // Same day, continue streak (don't increment)
       continue;
     } else {
+      // Gap in streak, save longest streak and reset
       if (tempStreak > longestStreak) {
         longestStreak = tempStreak;
       }
@@ -64,15 +69,55 @@ export function calculateStats(icebaths: Icebath[]): IcebathStats {
     lastDate = currentDate;
   }
 
+  // Check final tempStreak for longest streak
   if (tempStreak > longestStreak) {
     longestStreak = tempStreak;
   }
 
-  // Check if current streak is still active (within last 2 days)
-  const mostRecentDate = new Date(sortedByDate[0]?.date || 0);
-  const daysSinceLast = differenceInDays(new Date(), mostRecentDate);
-  if (daysSinceLast > 1) {
-    currentStreak = 0;
+  // Calculate current streak (streak starting from most recent date going backwards)
+  // sortedByDate is already reversed (newest to oldest) from the previous loop
+  if (mostRecentDate) {
+    let streakFromRecent = 0;
+    let prevDate: Date | null = null;
+    
+    // Iterate from most recent to oldest, counting consecutive days
+    for (const ib of sortedByDate) {
+      const currentDate = new Date(ib.date);
+      currentDate.setHours(0, 0, 0, 0);
+      
+      if (prevDate === null) {
+        // First iteration: most recent date
+        prevDate = currentDate;
+        streakFromRecent = 1;
+        continue;
+      }
+      
+      const daysDiff = differenceInDays(prevDate, currentDate);
+      
+      if (daysDiff === 1) {
+        // Consecutive day, continue streak
+        streakFromRecent++;
+        prevDate = currentDate;
+      } else if (daysDiff === 0) {
+        // Same day (multiple entries), don't increment but continue
+        continue;
+      } else {
+        // Gap found, stop counting current streak
+        break;
+      }
+    }
+    
+    // Check if streak is still active (most recent date is today or yesterday)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysSinceLast = differenceInDays(today, mostRecentDate);
+    
+    // Streak is active if last entry was today (0 days) or yesterday (1 day)
+    if (daysSinceLast <= 1) {
+      currentStreak = streakFromRecent;
+    } else {
+      currentStreak = 0;
+    }
   }
 
   return {
