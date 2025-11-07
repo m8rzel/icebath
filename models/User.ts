@@ -50,5 +50,12 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Virtual für Icebaths (optional, für zukünftige Verwendung)
+UserSchema.virtual("icebaths", {
+  ref: "Icebath",
+  localField: "_id",
+  foreignField: "userId",
+});
+
 export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 

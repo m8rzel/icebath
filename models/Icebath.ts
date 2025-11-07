@@ -5,7 +5,7 @@ export interface IIcebath extends Document {
   temperature: number;
   duration: number;
   notes?: string;
-  userId?: string; // Für zukünftige Multi-User-Funktionalität
+  userId: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

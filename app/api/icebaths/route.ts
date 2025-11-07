@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Icebath from "@/models/Icebath";
+import mongoose from "mongoose";
 
-function getUserIdFromSession(request: NextRequest): string | null {
+function getUserIdFromSession(request: NextRequest): mongoose.Types.ObjectId | null {
   const sessionCookie = request.cookies.get("session");
   if (!sessionCookie) return null;
   
@@ -10,7 +11,9 @@ function getUserIdFromSession(request: NextRequest): string | null {
     const sessionData = JSON.parse(
       Buffer.from(sessionCookie.value, "base64").toString()
     );
-    return sessionData.userId || null;
+    if (!sessionData.userId) return null;
+    // Konvertiere String zu ObjectId
+    return new mongoose.Types.ObjectId(sessionData.userId);
   } catch {
     return null;
   }
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
       temperature: Number(temperature),
       duration: Number(duration),
       notes: notes || "",
-      userId,
+      userId: userId, // userId ist bereits ObjectId
     });
 
     await icebath.save();
@@ -132,7 +135,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const result = await Icebath.deleteOne({
-      _id: id,
+      _id: new mongoose.Types.ObjectId(id),
       userId,
     });
 
