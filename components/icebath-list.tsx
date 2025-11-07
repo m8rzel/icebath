@@ -41,7 +41,7 @@ export function IcebathList({ icebaths, onDelete }: IcebathListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Datum</TableHead>
+              <TableHead>Datum & Uhrzeit</TableHead>
               <TableHead>Temperatur</TableHead>
               <TableHead>Dauer</TableHead>
               <TableHead>Notizen</TableHead>

@@ -27,6 +27,12 @@ interface AddIcebathDialogProps {
 export function AddIcebathDialog({ onAdd }: AddIcebathDialogProps) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date>(new Date());
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  });
   const [temperature, setTemperature] = useState("");
   const [minutes, setMinutes] = useState("");
   const [seconds, setSeconds] = useState("");
@@ -48,16 +54,38 @@ export function AddIcebathDialog({ onAdd }: AddIcebathDialogProps) {
       return;
     }
 
+    // Kombiniere Datum und Uhrzeit in mitteleuropäischer Zeit
+    const [hours, minutesFromTime] = time.split(":").map(Number);
+    
+    // Erstelle ein Datum mit der lokalen Zeit (MEZ/MESZ)
+    // Wir nehmen an, dass die Eingabe bereits in MEZ/MESZ ist
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    
+    // Erstelle ein Date-Objekt mit der lokalen Zeit
+    // JavaScript Date verwendet die lokale Zeitzone des Browsers
+    const combinedDate = new Date(year, month, day, hours || 0, minutesFromTime || 0, 0, 0);
+    
+    // Konvertiere zu UTC für die Speicherung, aber behalte die MEZ/MESZ Zeit bei
+    // Wir speichern die Zeit als UTC, aber mit der Annahme, dass sie MEZ/MESZ war
+    // Das bedeutet: MEZ = UTC+1, MESZ = UTC+2
+    // Für die Speicherung verwenden wir die lokale Zeit und lassen MongoDB sie als UTC speichern
+
     try {
       await onAdd({
-        date: date.toISOString(),
+        date: combinedDate.toISOString(),
         temperature: temp,
         duration: totalDuration,
         notes: notes.trim() || undefined,
       });
 
       // Reset form
-      setDate(new Date());
+      const now = new Date();
+      setDate(now);
+      const hoursStr = now.getHours().toString().padStart(2, "0");
+      const minutesStr = now.getMinutes().toString().padStart(2, "0");
+      setTime(`${hoursStr}:${minutesStr}`);
       setTemperature("");
       setMinutes("");
       setSeconds("");
@@ -86,7 +114,7 @@ export function AddIcebathDialog({ onAdd }: AddIcebathDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Datum & Uhrzeit</Label>
+            <Label>Datum</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -109,6 +137,20 @@ export function AddIcebathDialog({ onAdd }: AddIcebathDialogProps) {
                 />
               </PopoverContent>
             </Popover>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="time">Uhrzeit (MEZ/MESZ)</Label>
+            <Input
+              id="time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Mitteleuropäische Zeit (MEZ/MESZ)
+            </p>
           </div>
           
           <div className="space-y-2">
