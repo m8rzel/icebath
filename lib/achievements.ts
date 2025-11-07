@@ -1,5 +1,5 @@
 import { Icebath } from "@/types/icebath";
-import { Achievement } from "@/types/achievements";
+import { Achievement, UserLevel } from "@/types/achievements";
 import { calculateStats } from "./stats";
 import { format, getDay, getHours, getMonth, isWeekend, startOfWeek, endOfWeek, isWithinInterval, differenceInDays } from "date-fns";
 
@@ -814,7 +814,7 @@ export function calculateXP(icebaths: Icebath[], achievements: Achievement[]): n
   return xp;
 }
 
-export function calculateLevel(xp: number): { level: number; xpForNextLevel: number; totalXp: number } {
+export function calculateLevel(xp: number): UserLevel {
   const totalXp = xp;
   let level = 1;
   let xpNeeded = 50; // Level 1 benötigt 50 XP (realistischer Start)
@@ -849,6 +849,7 @@ export function calculateLevel(xp: number): { level: number; xpForNextLevel: num
   
   return {
     level,
+    xp: totalXp,
     xpForNextLevel: xpNeeded,
     totalXp,
   };
