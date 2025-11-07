@@ -730,23 +730,84 @@ function calculateLongStreak(icebaths: Icebath[], minDuration: number): number {
 export function calculateXP(icebaths: Icebath[], achievements: Achievement[]): number {
   let xp = 0;
   
-  // XP für jedes Eisbad
+  // XP für jedes Eisbad (ausgewogen für langfristige Motivation)
   icebaths.forEach(ib => {
-    xp += 10; // Base XP
-    xp += Math.floor(ib.duration / 10); // 1 XP pro 10 Sekunden
-    if (ib.temperature <= 5) xp += 5; // Bonus für kalte Temperaturen
-    if (ib.temperature <= 0) xp += 10; // Extra Bonus für 0°C oder kälter
+    xp += 5; // Base XP (reduziert für langsameren Fortschritt)
+    xp += Math.floor(ib.duration / 15); // 1 XP pro 15 Sekunden (reduziert)
+    
+    // Temperatur-Boni (moderat)
+    if (ib.temperature <= 5) xp += 3; // Bonus für kalte Temperaturen
+    if (ib.temperature <= 3) xp += 5; // Extra Bonus für sehr kalte Temperaturen
+    if (ib.temperature <= 0) xp += 10; // Bonus für 0°C oder kälter
+    if (ib.temperature < 0) xp += 15; // Extra Bonus für unter Null
+    
+    // Dauer-Boni (moderat)
+    if (ib.duration >= 300) xp += 10; // Bonus für 5+ Minuten
+    if (ib.duration >= 600) xp += 25; // Bonus für 10+ Minuten
+    if (ib.duration >= 900) xp += 50; // Bonus für 15+ Minuten
+    if (ib.duration >= 1200) xp += 100; // Bonus für 20+ Minuten
+    
+    // Kombinations-Boni (moderat)
+    if (ib.temperature <= 3 && ib.duration >= 300) xp += 15; // Kalt & Lang
+    if (ib.temperature <= 0 && ib.duration >= 300) xp += 30; // Unter Null & Lang
   });
   
-  // XP für Achievements
+  // XP für Achievements (ausgewogen)
   achievements.forEach(ach => {
     if (ach.unlockedAt) {
-      xp += 50; // Base XP für Achievement
-      if (ach.category === "streak" && ach.target >= 30) xp += 100;
-      if (ach.category === "duration" && ach.target >= 300) xp += 150;
-      if (ach.category === "total" && ach.target >= 100) xp += 200;
-      if (ach.category === "extreme") xp += 200;
-      if (ach.category === "special") xp += 100;
+      // Base XP basierend auf Kategorie und Schwierigkeit
+      let baseXP = 20; // Basis XP für einfache Achievements
+      
+      switch (ach.category) {
+        case "streak":
+          baseXP = 30;
+          if (ach.target >= 30) baseXP = 50;
+          if (ach.target >= 100) baseXP = 150;
+          if (ach.target >= 365) baseXP = 500;
+          break;
+        case "duration":
+          baseXP = 30;
+          if (ach.target >= 300) baseXP = 50;
+          if (ach.target >= 600) baseXP = 150;
+          if (ach.target >= 1200) baseXP = 400;
+          break;
+        case "temperature":
+          baseXP = 25;
+          if (ach.target <= 3) baseXP = 50;
+          if (ach.target <= 0) baseXP = 100;
+          if (ach.target < 0) baseXP = 200;
+          break;
+        case "total":
+          baseXP = 30;
+          if (ach.target >= 50) baseXP = 75;
+          if (ach.target >= 100) baseXP = 150;
+          if (ach.target >= 500) baseXP = 400;
+          if (ach.target >= 1000) baseXP = 1000;
+          break;
+        case "extreme":
+          baseXP = 200; // Extreme Achievements sind selten und wertvoll
+          break;
+        case "special":
+          baseXP = 100; // Special Achievements sind besonders
+          if (ach.id === "special-365-streak" || ach.id === "special-1000-total") baseXP = 1000;
+          break;
+        case "combination":
+          baseXP = 50;
+          if (ach.target >= 50) baseXP = 150;
+          if (ach.target >= 100) baseXP = 300;
+          break;
+        case "consistency":
+          baseXP = 40;
+          break;
+        case "time":
+          baseXP = 30;
+          break;
+        case "seasonal":
+          baseXP = 35;
+          break;
+      }
+      
+      xp += baseXP;
     }
   });
   
@@ -756,13 +817,34 @@ export function calculateXP(icebaths: Icebath[], achievements: Achievement[]): n
 export function calculateLevel(xp: number): { level: number; xpForNextLevel: number; totalXp: number } {
   const totalXp = xp;
   let level = 1;
-  let xpNeeded = 100;
+  let xpNeeded = 50; // Level 1 benötigt 50 XP (realistischer Start)
   let remainingXp = xp;
+  
+  // Level 1-10: Moderate Steigerung (für Anfänger schnell erreichbar)
+  // Level 11-25: Mittlere Steigerung (regelmäßige Nutzer)
+  // Level 26-50: Stärkere Steigerung (dedizierte Nutzer)
+  // Level 51+: Sehr starke Steigerung (Langzeit-Veteranen)
   
   while (remainingXp >= xpNeeded) {
     remainingXp -= xpNeeded;
     level++;
-    xpNeeded = Math.floor(100 * Math.pow(1.5, level - 1)); // Exponential growth: 100, 150, 225, 337, ...
+    
+    if (level <= 10) {
+      // Level 2-10: 50, 75, 112, 168, 252, 378, 567, 850, 1275, 1912
+      xpNeeded = Math.floor(50 * Math.pow(1.5, level - 1));
+    } else if (level <= 25) {
+      // Level 11-25: Steigere Basis
+      const baseLevel = level - 10;
+      xpNeeded = Math.floor(1912 * Math.pow(1.35, baseLevel));
+    } else if (level <= 50) {
+      // Level 26-50: Noch stärkere Steigerung
+      const baseLevel = level - 25;
+      xpNeeded = Math.floor(1912 * Math.pow(1.35, 15) * Math.pow(1.4, baseLevel));
+    } else {
+      // Level 51+: Sehr starke Steigerung für Langzeit-Motivation
+      const baseLevel = level - 50;
+      xpNeeded = Math.floor(1912 * Math.pow(1.35, 15) * Math.pow(1.4, 25) * Math.pow(1.25, baseLevel));
+    }
   }
   
   return {

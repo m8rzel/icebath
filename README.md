@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Icebath Tracker
 
-## Getting Started
+Eine moderne Next.js App zum Tracken von Eisbädern mit MongoDB-Persistenz, Gamification und umfangreichen Statistiken.
 
-First, run the development server:
+## Features
+
+- ❄️ Eisbäder tracken (Datum, Temperatur, Dauer, Notizen)
+- 📊 Interaktive Charts für Temperatur- und Dauer-Verlauf
+- 🏆 134+ Achievements für langfristige Motivation
+- 🎯 Wöchentliche und monatliche Challenges
+- ⭐ XP/Level System
+- 📈 Detaillierte Statistiken
+- 💾 MongoDB-Persistenz
+- 📤 Export-Funktionen (CSV, JSON)
+- 🔗 Social Sharing
+
+## Setup
+
+### 1. Dependencies installieren
+
+```bash
+npm install
+```
+
+### 2. MongoDB einrichten
+
+#### Option A: MongoDB Atlas (Cloud)
+
+1. Erstelle einen kostenlosen Account auf [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Erstelle einen neuen Cluster
+3. Erstelle einen Database User
+4. Whiteliste deine IP-Adresse (oder `0.0.0.0/0` für alle IPs)
+5. Kopiere den Connection String
+
+#### Option B: Lokale MongoDB
+
+Installiere MongoDB lokal und starte den Service.
+
+### 3. Environment Variables
+
+Erstelle eine `.env.local` Datei im Root-Verzeichnis:
+
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/icebath?retryWrites=true&w=majority
+```
+
+Oder für lokale MongoDB:
+
+```env
+MONGODB_URI=mongodb://localhost:27017/icebath
+```
+
+### 4. Development Server starten
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Öffne [http://localhost:3000](http://localhost:3000) im Browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: Next.js 15 (App Router)
+- **UI**: shadcn/ui, Tailwind CSS
+- **Database**: MongoDB mit Mongoose
+- **Charts**: Recharts
+- **Icons**: Lucide React
 
-## Learn More
+## Projektstruktur
 
-To learn more about Next.js, take a look at the following resources:
+```
+icebath/
+├── app/
+│   ├── api/icebaths/     # API Routes für CRUD-Operationen
+│   ├── page.tsx          # Hauptseite
+│   └── layout.tsx        # Root Layout
+├── components/           # React Komponenten
+│   ├── ui/              # shadcn/ui Komponenten
+│   ├── achievements-panel.tsx
+│   ├── challenges-panel.tsx
+│   ├── temperature-chart.tsx
+│   └── ...
+├── hooks/               # Custom Hooks
+├── lib/                 # Utilities
+│   ├── mongodb.ts       # MongoDB Connection
+│   ├── achievements.ts  # Achievement-Logik
+│   └── stats.ts         # Statistik-Berechnungen
+├── models/              # Mongoose Models
+│   └── Icebath.ts
+└── types/               # TypeScript Types
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Endpoints
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `GET /api/icebaths` - Alle Eisbäder abrufen
+- `POST /api/icebaths` - Neues Eisbad erstellen
+- `DELETE /api/icebaths?id=<id>` - Eisbad löschen
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push dein Code zu GitHub
+2. Importiere das Projekt in Vercel
+3. Füge die `MONGODB_URI` Environment Variable hinzu
+4. Deploy!
+
+### Andere Plattformen
+
+Stelle sicher, dass:
+- Node.js 18+ installiert ist
+- Die `MONGODB_URI` Environment Variable gesetzt ist
+- MongoDB von deiner Deployment-Plattform erreichbar ist
+
+## License
+
+MIT

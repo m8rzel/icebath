@@ -11,7 +11,7 @@ interface StatsCardsProps {
 
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 h-full">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 h-full w-full">
       <Card className="h-full flex flex-col bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200 dark:border-amber-800 hover:shadow-lg transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
           <CardTitle className="text-sm font-semibold text-amber-900 dark:text-amber-100">Gesamt</CardTitle>
