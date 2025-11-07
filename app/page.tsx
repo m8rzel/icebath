@@ -102,7 +102,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4 space-y-8">
+      <div className="container mx-auto py-8 px-4 space-y-8 max-w-full overflow-x-hidden">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
@@ -139,9 +139,13 @@ export default function Home() {
         </div>
 
         {/* Gamification Section */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <ChallengesPanel challenges={allChallenges} />
-          <AchievementsPanel achievements={achievements} />
+        <div className="grid gap-4 md:grid-cols-2 w-full min-w-0">
+          <div className="min-w-0 w-full">
+            <ChallengesPanel challenges={allChallenges} />
+          </div>
+          <div className="min-w-0 w-full">
+            <AchievementsPanel achievements={achievements} />
+          </div>
         </div>
 
         <Separator />

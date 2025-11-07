@@ -36,14 +36,14 @@ export function AchievementsPanel({ achievements }: AchievementsPanelProps) {
 
   return (
     <>
-      <Card className="flex flex-col max-h-[900px]">
+      <Card className="flex flex-col max-h-[900px] w-full min-w-0">
         <CardHeader className="flex-shrink-0">
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
             Achievements ({unlocked.length}/{achievements.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 flex flex-col flex-1 min-h-0 overflow-hidden">
+        <CardContent className="space-y-4 flex flex-col flex-1 min-h-0 overflow-hidden w-full min-w-0">
           {unlocked.length > 0 && (
             <div className="flex-shrink-0">
               <h3 className="text-sm font-semibold mb-3 text-green-600 dark:text-green-400">
