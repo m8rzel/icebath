@@ -1,65 +1,81 @@
-import Image from "next/image";
+"use client";
+
+import { useIcebaths } from "@/hooks/use-icebaths";
+import { calculateStats } from "@/lib/stats";
+import { calculateAchievements, calculateXP, calculateLevel } from "@/lib/achievements";
+import { getWeeklyChallenges, getMonthlyChallenges } from "@/lib/challenges";
+import { AddIcebathDialog } from "@/components/add-icebath-dialog";
+import { StatsCards } from "@/components/stats-cards";
+import { IcebathList } from "@/components/icebath-list";
+import { TemperatureChart } from "@/components/temperature-chart";
+import { DurationChart } from "@/components/duration-chart";
+import { AchievementsPanel } from "@/components/achievements-panel";
+import { LevelCard } from "@/components/level-card";
+import { ChallengesPanel } from "@/components/challenges-panel";
+import { ExportDialog } from "@/components/export-dialog";
+import { ShareButton } from "@/components/share-button";
+import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
+  const { icebaths, isLoading, addIcebath, removeIcebath } = useIcebaths();
+  const stats = calculateStats(icebaths);
+  const achievements = calculateAchievements(icebaths);
+  const xp = calculateXP(icebaths, achievements);
+  const level = calculateLevel(xp);
+  const weeklyChallenges = getWeeklyChallenges(icebaths);
+  const monthlyChallenges = getMonthlyChallenges(icebaths);
+  const allChallenges = [...weeklyChallenges, ...monthlyChallenges];
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-muted-foreground">Lade...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 px-4 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">Icebath Tracker</h1>
+            <p className="text-muted-foreground mt-2">
+              Tracke deine Eisbäder und verbessere deine Performance
+            </p>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <ShareButton stats={stats} />
+            <ExportDialog icebaths={icebaths} />
+            <AddIcebathDialog onAdd={addIcebath} />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Level & Stats Row */}
+        <div className="grid gap-4 md:grid-cols-4 md:grid-rows-1">
+          <LevelCard level={level} />
+          <div className="md:col-span-3 h-full">
+            <StatsCards stats={stats} />
+          </div>
         </div>
-      </main>
+
+        {/* Charts */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <TemperatureChart icebaths={icebaths} />
+          <DurationChart icebaths={icebaths} />
+        </div>
+
+        {/* Gamification Section */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <ChallengesPanel challenges={allChallenges} />
+          <AchievementsPanel achievements={achievements} />
+        </div>
+
+        <Separator />
+
+        {/* Icebath List */}
+        <IcebathList icebaths={icebaths} onDelete={removeIcebath} />
+      </div>
     </div>
   );
 }
