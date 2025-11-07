@@ -21,7 +21,7 @@ import { User } from "lucide-react";
 
 export default function Home() {
   const { user, isLoading: authLoading, login, register, logout } = useAuth();
-  const { icebaths, isLoading, error, addIcebath, removeIcebath } = useIcebaths();
+  const { icebaths, isLoading, error, addIcebath, updateIcebath, removeIcebath } = useIcebaths();
   const stats = calculateStats(icebaths);
   const achievements = calculateAchievements(icebaths);
   const xp = calculateXP(icebaths, achievements);
@@ -150,8 +150,8 @@ export default function Home() {
 
         <Separator />
 
-        {/* Icebath List */}
-        <IcebathList icebaths={icebaths} onDelete={removeIcebath} />
+            {/* Icebath List */}
+            <IcebathList icebaths={icebaths} onDelete={removeIcebath} onUpdate={updateIcebath} />
       </div>
     </div>
   );

@@ -63,6 +63,32 @@ export function useIcebaths() {
     }
   };
 
+  const updateIcebath = async (id: string, icebath: Omit<Icebath, "id">) => {
+    try {
+      setError(null);
+      const response = await fetch(`/api/icebaths/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(icebath),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update icebath");
+      }
+
+      const updatedIcebath = await response.json();
+      setIcebaths((prev) =>
+        prev.map((ib) => (ib.id === id ? updatedIcebath : ib))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error updating icebath:", err);
+      throw err;
+    }
+  };
+
   const removeIcebath = async (id: string) => {
     try {
       setError(null);
@@ -87,6 +113,7 @@ export function useIcebaths() {
     isLoading,
     error,
     addIcebath,
+    updateIcebath,
     removeIcebath,
     refetch: fetchIcebaths,
   };
